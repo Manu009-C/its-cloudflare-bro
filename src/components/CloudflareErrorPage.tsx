@@ -69,7 +69,7 @@ function defaultHost(): string {
   } catch {
     // ignore
   }
-  return "example.invalid";
+  return "this-is-a-joke.dontsueme.com";
 }
 
 function IconBrowserOk() {
@@ -82,7 +82,7 @@ function IconBrowserOk() {
       <circle cx="42" cy="25" r="3" fill="#9ca3af" />
       <circle cx="34" cy="56" r="14" fill="#84cc16" />
       <path
-        d="M28 56l4.5 5.5L44 46"
+        d="M27 56l5 6 10-14"
         fill="none"
         stroke="#ffffff"
         strokeWidth="5"
@@ -160,7 +160,7 @@ export function CloudflareErrorPage(props: CloudflareErrorPageProps) {
     <main className={["min-h-screen bg-white text-gray-800", className].filter(Boolean).join(" ")}>
       <div className="mx-auto max-w-5xl px-6 py-12">
         <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
-          <div className="flex items-baseline gap-4">
+          <div className="flex flex-col gap-2 md:gap-4 items-start md:items-baseline">
             <h1 className="text-5xl font-light tracking-tight text-gray-700">
               Error <span className="font-normal">{resolvedError.code}</span>
             </h1>
@@ -216,7 +216,7 @@ export function CloudflareErrorPage(props: CloudflareErrorPageProps) {
 
           {!hideFooter && (
             <div className="border-t border-gray-200 px-8 py-5 text-center text-xs text-gray-500">
-              <span className="font-semibold text-gray-600">Fake Ray ID:</span>{" "}
+              <span className="font-semibold text-gray-600">Ray ID:</span>{" "}
               <span className="font-mono">{stableRayId}</span> • <span className="font-semibold">Your IP:</span>{" "}
               <span className="font-mono">{visitorIp}</span> • Performance &amp; security by{" "}
               <a
@@ -225,7 +225,7 @@ export function CloudflareErrorPage(props: CloudflareErrorPageProps) {
                 rel="noreferrer"
                 className="text-gray-600 underline decoration-gray-300 underline-offset-2 hover:text-gray-800"
               >
-                John Smith
+                Cloud-Man-U
               </a>
             </div>
           )}
