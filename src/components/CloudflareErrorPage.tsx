@@ -201,6 +201,10 @@ export function CloudflareErrorPage(props: CloudflareErrorPageProps) {
     return getRandomJokeCloudflareError(seed);
   }, [code, error, seed]);
 
+  // Defensive fallback: even if a caller passes a pathological `code` (NaN/Infinity/float),
+  // we should never crash during render.
+  const safeError = resolvedError ?? getRandomJokeCloudflareError(seed);
+
   const stableRayId = React.useMemo(() => {
     if (rayId) return rayId;
     // Cloudflare-ish Ray ID vibe: 16-hex + 4-hex suffix.
@@ -216,9 +220,9 @@ export function CloudflareErrorPage(props: CloudflareErrorPageProps) {
         <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
           <div className="flex flex-col gap-2 md:gap-4 items-start md:items-baseline">
             <h1 className="text-5xl font-light tracking-tight text-gray-700">
-              Error <span className="font-normal">{resolvedError.code}</span>
+              Error <span className="font-normal">{safeError.code}</span>
             </h1>
-            <p className="text-lg font-light text-gray-500">{resolvedError.title}</p>
+            <p className="text-lg font-light text-gray-500">{safeError.title}</p>
           </div>
           <p className="text-sm text-gray-500">
             Ray ID: <span className="font-mono text-gray-700">{stableRayId}</span> •{" "}
@@ -255,13 +259,13 @@ export function CloudflareErrorPage(props: CloudflareErrorPageProps) {
               <div>
                 <h2 className="text-2xl font-light text-gray-800">What happened?</h2>
                 <p className="mt-3 text-sm leading-6 text-gray-600">
-                  {resolvedError.whatHappened ?? resolvedError.description}
+                  {safeError.whatHappened ?? safeError.description}
                 </p>
               </div>
               <div>
                 <h2 className="text-2xl font-light text-gray-800">What can I do?</h2>
                 <p className="mt-3 text-sm leading-6 text-gray-600">
-                  {resolvedError.whatYouCanDo ??
+                  {safeError.whatYouCanDo ??
                     "Try again in a few minutes. If you are the host, perform a ritual restart and offer the logs a small sacrifice."}
                 </p>
               </div>

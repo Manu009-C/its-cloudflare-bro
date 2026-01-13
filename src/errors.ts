@@ -139,8 +139,12 @@ export function getJokeCloudflareErrorByCode(
 
 export function getRandomJokeCloudflareError(seed?: number): JokeCloudflareError {
   // Deterministic-ish if a seed is provided; otherwise use current time.
-  const n = typeof seed === "number" ? Math.abs(seed) : Date.now();
-  const idx = n % JOKE_CLOUDFLARE_ERRORS.length;
+  const len = JOKE_CLOUDFLARE_ERRORS.length;
+  // Normalize seed to a finite integer so modulo produces a valid array index.
+  // Note: `typeof NaN === "number"` and `Infinity % len` / `NaN % len` -> NaN.
+  const n =
+    typeof seed === "number" && Number.isFinite(seed) ? Math.abs(Math.trunc(seed)) : Date.now();
+  const idx = n % len;
   return JOKE_CLOUDFLARE_ERRORS[idx]!;
 }
 
