@@ -55,20 +55,39 @@ function formatUtc(d: Date): string {
   return `${yyyy}-${mm}-${dd} ${hh}:${mi}:${ss} UTC`;
 }
 
-function randomHex(len: number): string {
+function fnv1a32(input: string): number {
+  // Small, deterministic string hash (stable across SSR + hydration).
+  // https://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function
+  let h = 0x811c9dc5;
+  for (let i = 0; i < input.length; i++) {
+    h ^= input.charCodeAt(i);
+    h = Math.imul(h, 0x01000193);
+  }
+  return h >>> 0;
+}
+
+function mulberry32(seed: number): () => number {
+  // Simple seeded PRNG with decent distribution for UI "randomness".
+  let a = seed >>> 0;
+  return () => {
+    a = (a + 0x6d2b79f5) >>> 0;
+    let t = a;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function hexFromSeed(seed: number, len: number): string {
+  const rnd = mulberry32(seed);
   const alphabet = "0123456789abcdef";
   let out = "";
-  for (let i = 0; i < len; i++) out += alphabet[Math.floor(Math.random() * alphabet.length)];
+  for (let i = 0; i < len; i++) out += alphabet[Math.floor(rnd() * alphabet.length)]!;
   return out;
 }
 
-function defaultHost(): string {
-  try {
-    // eslint-disable-next-line no-restricted-globals
-    if (typeof window !== "undefined" && window.location?.hostname) return window.location.hostname;
-  } catch {
-    // ignore
-  }
+function defaultHostFallback(): string {
+  // IMPORTANT: SSR-safe fallback; do not read `window` during render.
   return "this-is-a-joke.dontsueme.com";
 }
 
@@ -132,29 +151,64 @@ function IconHostOk() {
 }
 
 export function CloudflareErrorPage(props: CloudflareErrorPageProps) {
+  const reactId = React.useId();
+  const seed = React.useMemo(() => fnv1a32(reactId), [reactId]);
+
   const {
     error,
     code,
     rayId,
     colo = "Paris",
-    host = defaultHost(),
+    host,
     visitorIp = "203.0.113.13",
-    timestamp = new Date(),
+    timestamp,
     hideFooter,
     className
   } = props;
 
+  // Avoid SSR/hydration mismatches: don't read `window.location.hostname` during render.
+  // If `host` isn't provided, we render a stable fallback on both SSR and first client render,
+  // then "upgrade" to the real hostname after mount.
+  const [resolvedHost, setResolvedHost] = React.useState<string>(() => host ?? defaultHostFallback());
+  React.useEffect(() => {
+    if (host) {
+      setResolvedHost(host);
+      return;
+    }
+    try {
+      // eslint-disable-next-line no-restricted-globals
+      if (typeof window !== "undefined" && window.location?.hostname) setResolvedHost(window.location.hostname);
+    } catch {
+      // ignore
+    }
+  }, [host]);
+
+  // Same SSR/hydration principle for timestamps: default to a stable placeholder, then set
+  // an actual timestamp after mount if none was provided.
+  const [resolvedTimestamp, setResolvedTimestamp] = React.useState<Date | null>(() => timestamp ?? null);
+  React.useEffect(() => {
+    if (timestamp) {
+      setResolvedTimestamp(timestamp);
+      return;
+    }
+    setResolvedTimestamp((prev) => prev ?? new Date());
+  }, [timestamp]);
+
   const resolvedError = React.useMemo(() => {
     if (error) return error;
     if (typeof code === "number") return getJokeCloudflareErrorByCode(code) ?? getRandomJokeCloudflareError(code);
-    return getRandomJokeCloudflareError();
-  }, [code, error]);
+    // Deterministic "random" error to avoid SSR/hydration mismatch when no code/seed is provided.
+    return getRandomJokeCloudflareError(seed);
+  }, [code, error, seed]);
 
   const stableRayId = React.useMemo(() => {
     if (rayId) return rayId;
     // Cloudflare-ish Ray ID vibe: 16-hex + 4-hex suffix.
-    return `${randomHex(16)}-${randomHex(4)}`;
-  }, [rayId]);
+    // Must be deterministic across SSR + hydration.
+    const main = hexFromSeed(seed ^ 0xa5a5a5a5, 16);
+    const suffix = hexFromSeed(seed ^ 0x5a5a5a5a, 4);
+    return `${main}-${suffix}`;
+  }, [rayId, seed]);
 
   return (
     <main className={["min-h-screen bg-white text-gray-800", className].filter(Boolean).join(" ")}>
@@ -168,7 +222,7 @@ export function CloudflareErrorPage(props: CloudflareErrorPageProps) {
           </div>
           <p className="text-sm text-gray-500">
             Ray ID: <span className="font-mono text-gray-700">{stableRayId}</span> •{" "}
-            <span className="font-mono">{formatUtc(timestamp)}</span>
+            <span className="font-mono">{resolvedTimestamp ? formatUtc(resolvedTimestamp) : "—"}</span>
           </p>
         </div>
 
@@ -190,7 +244,7 @@ export function CloudflareErrorPage(props: CloudflareErrorPageProps) {
 
             <div className="flex flex-col items-center text-center">
               <IconHostOk />
-              <div className="mt-3 text-sm text-gray-600">{host}</div>
+              <div className="mt-3 text-sm text-gray-600">{resolvedHost}</div>
               <div className="mt-2 text-xl font-light text-gray-700">Host</div>
               <div className="text-xl font-semibold text-lime-600">Working</div>
             </div>
