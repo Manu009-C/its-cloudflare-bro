@@ -3,9 +3,9 @@
 > “It’s not down.  
 > It’s Cloudflare, bro.”
 
-A **parody HTML error page** inspired by the *vibe* of Cloudflare-style outage screens, created as a joke reference for when **something, somewhere, is mysteriously broken again**.
+A **parody React component library** inspired by the *vibe* of Cloudflare-style outage screens, created as a joke reference for when **something, somewhere, is mysteriously broken again**.
 
-Drop it into a project, link it in a group chat, or post it whenever an outage inevitably gets blamed on Cloudflare.
+It renders a fake Cloudflare-ish error page with **invented 6xx errors** that sound technically plausible while being obviously nonsense.
 
 ---
 
@@ -24,13 +24,48 @@ If you are looking for real Cloudflare error pages or outage information, please
 
 ## 🧠 What This Is
 
-- A **single static HTML page**
+- A **React + TypeScript component library**
+- Styled with **Tailwind** (compiled and shipped as `style.css`)
 - Designed to look *familiar* without copying anything proprietary
 - Intended for:
   - Joke repositories
   - Placeholder outage pages
   - Demos, mockups, and memes
   - Screenshots when “it worked yesterday”
+
+---
+
+## 📦 Install
+
+```bash
+npm i its-cloudflare-bro
+```
+
+---
+
+## ✅ Usage
+
+```tsx
+import { CloudflareErrorPage, JOKE_CLOUDFLARE_ERRORS } from "its-cloudflare-bro";
+import "its-cloudflare-bro/style.css";
+
+export function Example() {
+  return (
+    <CloudflareErrorPage
+      error={JOKE_CLOUDFLARE_ERRORS[0]}
+      colo="Paris"
+      host="definitely-real-origin.example"
+      visitorIp="203.0.113.13"
+    />
+  );
+}
+```
+
+---
+
+## 🖼️ Icons / assets
+
+No images required — the middle “Browser / Cloud / Host” icons are **inline SVG** bundled with the component.
 
 ---
 
