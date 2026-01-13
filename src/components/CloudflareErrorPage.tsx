@@ -82,7 +82,7 @@ function IconBrowserOk() {
       <circle cx="42" cy="25" r="3" fill="#9ca3af" />
       <circle cx="34" cy="56" r="14" fill="#84cc16" />
       <path
-        d="M27 56l5 6 10-14"
+        d="M28 56l4.5 5.5L44 46"
         fill="none"
         stroke="#ffffff"
         strokeWidth="5"
@@ -220,10 +220,12 @@ export function CloudflareErrorPage(props: CloudflareErrorPageProps) {
               <span className="font-mono">{stableRayId}</span> • <span className="font-semibold">Your IP:</span>{" "}
               <span className="font-mono">{visitorIp}</span> • Performance &amp; security by{" "}
               <a
-                href="https://example.invalid"
+                href="https://github.com/Manu009-C/its-cloudflare-bro"
+                target="_blank"
+                rel="noreferrer"
                 className="text-gray-600 underline decoration-gray-300 underline-offset-2 hover:text-gray-800"
               >
-                Cloudflair
+                John Smith
               </a>
             </div>
           )}
