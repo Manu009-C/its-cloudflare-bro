@@ -1,10 +1,10 @@
-import * as React from "react";
+import { useMemo, useState } from "react";
 import { CloudflareErrorPage, getRandomJokeCloudflareError } from "../index";
 
 export function App() {
   const demoMode = import.meta.env.VITE_ITS_CLOUDFLARE_BRO_DEMO === "true";
-  const [seed, setSeed] = React.useState(() => Date.now());
-  const error = React.useMemo(() => getRandomJokeCloudflareError(seed), [seed]);
+  const [seed, setSeed] = useState(() => Date.now());
+  const error = useMemo(() => getRandomJokeCloudflareError(seed), [seed]);
 
   return (
     <div>
