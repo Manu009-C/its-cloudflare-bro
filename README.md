@@ -75,7 +75,7 @@ No images required — the middle “Browser / Cloud / Host” icons are **inlin
 - An official Cloudflare product or service
 - A replacement for Cloudflare
 - Legal advice
-- A definitive explanation for why your site is down (but let’s be honest)
+- A definitive explanation for why your site is down
 
 ---
 
@@ -123,4 +123,4 @@ And now there’s a page for that.
 
 *“its-cloudflare-bro” is a joke name.  
 Please do not harass Cloudflare employees.  
-They are probably having a day.*
+They are probably having a bad day.*

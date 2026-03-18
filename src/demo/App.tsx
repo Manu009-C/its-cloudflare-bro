@@ -25,7 +25,7 @@ export function App() {
         </div>
       )}
 
-      <CloudflareErrorPage error={error} colo="Paris" host="edge-of-reason.invalid" />
+      <CloudflareErrorPage error={error} host="edge-of-reason.invalid" />
     </div>
   );
 }
