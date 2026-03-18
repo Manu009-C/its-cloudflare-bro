@@ -1,4 +1,4 @@
-import * as React from "react";
+import { useEffect, useId, useMemo, useState } from "react";
 import type { JokeCloudflareError } from "../errors";
 import { getJokeCloudflareErrorByCode, getRandomJokeCloudflareError } from "../errors";
 import { IconBrowserOk, IconCloudBad, IconHostOk } from "./icons";
@@ -93,8 +93,8 @@ function defaultHostFallback(): string {
 }
 
 export const CloudflareErrorPage = (props: CloudflareErrorPageProps) => {
-  const reactId = React.useId();
-  const seed = React.useMemo(() => fnv1a32(reactId), [reactId]);
+  const reactId = useId();
+  const seed = useMemo(() => fnv1a32(reactId), [reactId]);
 
   const {
     error,
@@ -111,8 +111,8 @@ export const CloudflareErrorPage = (props: CloudflareErrorPageProps) => {
   // Avoid SSR/hydration mismatches: don't read `window.location.hostname` during render.
   // If `host` isn't provided, we render a stable fallback on both SSR and first client render,
   // then "upgrade" to the real hostname after mount.
-  const [resolvedHost, setResolvedHost] = React.useState<string>(() => host ?? defaultHostFallback());
-  React.useEffect(() => {
+  const [resolvedHost, setResolvedHost] = useState<string>(() => host ?? defaultHostFallback());
+  useEffect(() => {
     if (host) {
       setResolvedHost(host);
       return;
@@ -127,8 +127,8 @@ export const CloudflareErrorPage = (props: CloudflareErrorPageProps) => {
 
   // Same SSR/hydration principle for timestamps: default to a stable placeholder, then set
   // an actual timestamp after mount if none was provided.
-  const [resolvedTimestamp, setResolvedTimestamp] = React.useState<Date | null>(() => timestamp ?? null);
-  React.useEffect(() => {
+  const [resolvedTimestamp, setResolvedTimestamp] = useState<Date | null>(() => timestamp ?? null);
+  useEffect(() => {
     if (timestamp) {
       setResolvedTimestamp(timestamp);
       return;
@@ -136,7 +136,7 @@ export const CloudflareErrorPage = (props: CloudflareErrorPageProps) => {
     setResolvedTimestamp((prev) => prev ?? new Date());
   }, [timestamp]);
 
-  const resolvedError = React.useMemo(() => {
+  const resolvedError = useMemo(() => {
     if (error) return error;
     if (typeof code === "number") return getJokeCloudflareErrorByCode(code) ?? getRandomJokeCloudflareError(code);
     // Deterministic "random" error to avoid SSR/hydration mismatch when no code/seed is provided.
@@ -147,7 +147,7 @@ export const CloudflareErrorPage = (props: CloudflareErrorPageProps) => {
   // we should never crash during render.
   const safeError = resolvedError ?? getRandomJokeCloudflareError(seed);
 
-  const stableRayId = React.useMemo(() => {
+  const stableRayId = useMemo(() => {
     if (rayId) return rayId;
     // Cloudflare-ish Ray ID vibe: 16-hex + 4-hex suffix.
     // Must be deterministic across SSR + hydration.
